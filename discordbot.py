@@ -6,7 +6,9 @@ from unittest import async_case
 from dateutil.relativedelta import relativedelta
 import discord
 
-TOKEN = 'hogehoge'
+TOKEN = 'TOKEN'
+
+client = discord.Client()
 
 # 日付の定義
 eventday1 = datetime.datetime(2022, 4, 1, 5, 0, 0)
@@ -37,15 +39,15 @@ def get_eventday(eventday):
 while 1:
     calc = eventday1 - today
     eventday1 = get_eventday(eventday1)
-    if 0 < calc.days+1 < 16:  # 17日以内にイベントがある場合表示する
-        outputdays1.append(calc.days+1)
+    if 0 < calc.days < 16:  # 16日以内にイベントがある場合表示する
+        outputdays1.append(calc.days)
     else:  # イベントが日付に達した場合ループを抜ける
         break
 while 1:
     calc = eventday2 - today
     eventday2 = get_eventday(eventday2)
-    if 0 < calc.days+1 < 16:  # 17日以内にイベントがある場合表示する
-        outputdays2.append(calc.days+1)
+    if 0 < calc.days < 16:  # 16日以内にイベントがある場合表示する
+        outputdays2.append(calc.days)
     else:  # イベントが日付に達した場合ループを抜ける
         break
 
@@ -54,11 +56,13 @@ while 1:
 async def on_message(message):
     if message.author.bot:
         return
-    if message.content == '!rasen_day':
+    if message.content == '!rasen':
         if len(outputdays1) == 0:
-            await message.channel.send(outputdays2[0])
+            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
+            await message.channel.send(m1)
         else:
-            await message.channel.send(outputdays1[0])
+            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            await message.channel.send(m2)
 
 # Botの起動とDiscordサーバーへの接続
 client.run(TOKEN)
