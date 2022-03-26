@@ -11,7 +11,7 @@ TOKEN = 'hogehoge'
 # 日付の定義
 eventday1 = datetime.datetime(2022, 4, 1, 5, 0, 0)
 eventday2 = datetime.datetime(2022, 4, 16, 5, 0, 0)
-today = datetime.datetime(2022, 4, 1, 7, 0, 0)
+today = datetime.datetime.today()
 stopday = datetime.datetime(2050, 12, 31, 23, 59, 59)
 
 # 空のリストを作成
