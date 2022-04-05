@@ -92,15 +92,10 @@ async def on_message(message):
                 # 日程
                 today_date = str(today.year) + "/" + \
                     str(today.month) + "/" + str(today.day)
-                formatted_start_date = time.strptime(start_date, "%Y/%m/%d")
-                formatted_finish_date = time.strptime(finish_date, "%Y/%m/%d")
-                formatted_today_date = time.strptime(today_date, "%Y/%m/%d")
-                if formatted_finish_date < formatted_today_date:
-                    await message.channel.send("**終了したガチャです**")
-
-                if formatted_start_date > formatted_today_date:
-                    await message.channel.send("**まだ開催されていないガチャです**")
-                else:
+                try:
+                    time.strptime(start_date, "%Y/%m/%d")
+                    time.strptime(finish_date, "%Y/%m/%d")
+                    time.strptime(today_date, "%Y/%m/%d")
                     # ガチャのピックアップ中のキャラ、日程を取り出す
                     get_gacha_img = tables[i].find(
                         "a").find("img", {"class": ""})
@@ -110,6 +105,17 @@ async def on_message(message):
                     await message.channel.send(get_gacha_imgs[0])
                     m3 = "開催日:" + start_date + "〜" + "終了日:" + finish_date
                     await message.channel.send(m3)
+                except ValueError:
+                    # ガチャのピックアップ中のキャラ、日程を取り出す
+                    get_gacha_img = tables[i].find(
+                        "a").find("img", {"class": ""})
+                    get_gacha_names.append(get_gacha_img.get("alt"))
+                    get_gacha_imgs.append(get_gacha_img.get("src"))
+                    await message.channel.send(get_gacha_names[0])
+                    await message.channel.send(get_gacha_imgs[0])
+                    except_part_list = []
+                    for k in range(26):
+                        except_part_list.append(part_list[k])
 
 
 # Botの起動とDiscordサーバーへの接続
