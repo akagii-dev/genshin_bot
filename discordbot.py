@@ -101,36 +101,35 @@ async def on_message(message):
                 str(today.month) + "/" + str(today.day)
             try:
                 time.strptime(start_date, "%Y/%m/%d")
-                time.strptime(finish_date, "%Y/%m/%d")
-                time.strptime(today_date, "%Y/%m/%d")
-                # ガチャのピックアップ中のキャラ、日程を取り出す
-                get_gacha_img = tables[i].find(
-                    "a").find("img", {"class": ""})
-                get_gacha_names.append(get_gacha_img.get("alt"))
-                get_gacha_imgs.append(get_gacha_img.get("src"))
-                m3 = "開催日:" + start_date + "〜" + "終了日:" + finish_date
-                embed = discord.Embed(
-                    title=get_gacha_names[0], description=m3, color=0x7b68ee)
-                embed.set_image(url=get_gacha_imgs[0])
-                await message.channel.send(embed=embed)
-            except ValueError:
-                await message.channel.send("次のピックアップキャラを確認しますか?(y/n)")
-                if message.content == "y" or message.content == "yes":
+                formatted_finish_date = time.strptime(finish_date, "%Y/%m/%d")
+                formatted_today_date = time.strptime(today_date, "%Y/%m/%d")
+                if formatted_finish_date < formatted_today_date:
+                    return
+                else:
                     # ガチャのピックアップ中のキャラ、日程を取り出す
                     get_gacha_img = tables[i].find(
                         "a").find("img", {"class": ""})
                     get_gacha_names.append(get_gacha_img.get("alt"))
                     get_gacha_imgs.append(get_gacha_img.get("src"))
-                    except_part_list = []
-                    for k in range(26):
-                        except_part_list.append(part_list[k])
-                    m4 = ''.join(except_part_list)
+                    m3 = "開催日:" + start_date + "〜" + "終了日:" + finish_date
                     embed = discord.Embed(
-                        title=get_gacha_names[0], description=m4, color=0x7b68ee)
+                        title=get_gacha_names[0], description=m3, color=0x7b68ee)
                     embed.set_image(url=get_gacha_imgs[0])
                     await message.channel.send(embed=embed)
-                else:
-                    return
+            except ValueError:
+                # ガチャのピックアップ中のキャラ、日程を取り出す
+                get_gacha_img = tables[i].find(
+                    "a").find("img", {"class": ""})
+                get_gacha_names.append(get_gacha_img.get("alt"))
+                get_gacha_imgs.append(get_gacha_img.get("src"))
+                except_part_list = []
+                for k in range(26):
+                    except_part_list.append(part_list[k])
+                m4 = ''.join(except_part_list)
+                embed = discord.Embed(
+                    title=get_gacha_names[0], description=m4, color=0x7b68ee)
+                embed.set_image(url=get_gacha_imgs[0])
+                await message.channel.send(embed=embed)
 
 
 # Botの起動とDiscordサーバーへの接続
