@@ -4,6 +4,7 @@ from http import client
 from multiprocessing.connection import Client
 from tracemalloc import stop
 from unittest import async_case
+from xml.dom.minidom import Element
 from dateutil.relativedelta import relativedelta
 import discord
 import urllib.request
@@ -36,6 +37,12 @@ async def on_message(message):
     outputdays2 = []
     if message.author.bot:
         return
+    if message.content == '!help':
+        embed = discord.Embed(title="This is help command", color=0x7b68ee)
+        embed.add_field(name="!help", value="コマンド一覧", inline=False)
+        embed.add_field(name="!rasen", value="いつ螺旋が終了するかを表示する", inline=False)
+        embed.add_field(name="!gacha", value="ピックアップ中のガチャを表示する", inline=False)
+        await message.channel.send(embed=embed)
     if message.content == '!rasen':
         while 1:
             eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
@@ -58,10 +65,9 @@ async def on_message(message):
             m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
             await message.channel.send(m2)
     if message.content == '!dev':
-        await message.channel.send(today)
-        await message.channel.send(eventday1)
-        await message.channel.send(eventday2)
-        await message.channel.send(stopday)
+        embed = discord.Embed(title="This is help command", color=0x7b68ee)
+        embed.add_field(name="today", value=today, inline=False)
+        await message.channel.send(embed=embed)
 
     if message.content == '!gacha':
         # スクレイピングするURL
@@ -102,23 +108,29 @@ async def on_message(message):
                     "a").find("img", {"class": ""})
                 get_gacha_names.append(get_gacha_img.get("alt"))
                 get_gacha_imgs.append(get_gacha_img.get("src"))
-                await message.channel.send(get_gacha_names[0])
-                await message.channel.send(get_gacha_imgs[0])
                 m3 = "開催日:" + start_date + "〜" + "終了日:" + finish_date
-                await message.channel.send(m3)
+                embed = discord.Embed(
+                    title=get_gacha_names[0], description=m3, color=0x7b68ee)
+                embed.set_image(url=get_gacha_imgs[0])
+                await message.channel.send(embed=embed)
             except ValueError:
-                # ガチャのピックアップ中のキャラ、日程を取り出す
-                get_gacha_img = tables[i].find(
-                    "a").find("img", {"class": ""})
-                get_gacha_names.append(get_gacha_img.get("alt"))
-                get_gacha_imgs.append(get_gacha_img.get("src"))
-                await message.channel.send(get_gacha_names[0])
-                await message.channel.send(get_gacha_imgs[0])
-                except_part_list = []
-                for k in range(26):
-                    except_part_list.append(part_list[k])
-                m4 = ''.join(except_part_list)
-                await message.channel.send(m4)
+                await message.channel.send("次のピックアップキャラを確認しますか?(y/n)")
+                if message.content == "y" or message.content == "yes":
+                    # ガチャのピックアップ中のキャラ、日程を取り出す
+                    get_gacha_img = tables[i].find(
+                        "a").find("img", {"class": ""})
+                    get_gacha_names.append(get_gacha_img.get("alt"))
+                    get_gacha_imgs.append(get_gacha_img.get("src"))
+                    except_part_list = []
+                    for k in range(26):
+                        except_part_list.append(part_list[k])
+                    m4 = ''.join(except_part_list)
+                    embed = discord.Embed(
+                        title=get_gacha_names[0], description=m4, color=0x7b68ee)
+                    embed.set_image(url=get_gacha_imgs[0])
+                    await message.channel.send(embed=embed)
+                else:
+                    return
 
 
 # Botの起動とDiscordサーバーへの接続
