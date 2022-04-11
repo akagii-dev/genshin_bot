@@ -5,7 +5,7 @@ from tracemalloc import stop
 from dateutil.relativedelta import relativedelta
 import discord
 import urllib.request
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 import time
 import requests
 import os
@@ -42,10 +42,14 @@ async def on_message(message):
     if message.content == '!help':
         embed = discord.Embed(title="This is help command", color=0x7b68ee)
         embed.add_field(name="!help", value="コマンド一覧", inline=False)
-        embed.add_field(name="!rasen", value="いつ螺旋が終了するかを表示する", inline=False)
+        embed.add_field(name="!rasen_all", value="いつ螺旋が終了するかを表示し、全ての敵の編成を表示する", inline=False)
+        embed.add_field(name="!rasen9", value="いつ螺旋が終了するかを表示し、9層の敵の編成を表示する", inline=False)
+        embed.add_field(name="!rasen10", value="いつ螺旋が終了するかを表示し、10層の敵の編成を表示する", inline=False)
+        embed.add_field(name="!rasen11", value="いつ螺旋が終了するかを表示し、11層の敵の編成を表示する", inline=False)
+        embed.add_field(name="!rasen12", value="いつ螺旋が終了するかを表示し、12層の敵の編成を表示する", inline=False)
         embed.add_field(name="!gacha", value="ピックアップ中のガチャを表示する", inline=False)
         await message.channel.send(embed=embed)
-    if message.content == '!rasen':
+    if message.content == '!rasen_all':
         while 1:
             eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
             calc = eventday1 - today
@@ -63,147 +67,24 @@ async def on_message(message):
 
         user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
         header = {'User-Agent': user_agent}
-        url9 = "https://spiralabyss.org/floor-9"
-        url10 = "https://spiralabyss.org/floor-10"
-        url11 = "https://spiralabyss.org/floor-11"
-        url12 = "https://spiralabyss.org/floor-12"
+        before_url = "https://spiralabyss.org/floor-"
 
         if len(outputdays1) == 0:
             m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
             await message.channel.send(m1)
-            re = requests.get(url9, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
-
-            re = requests.get(url10, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
-        
-            re = requests.get(url11, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
-
-            re = requests.get(url12, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
         else:
-            m1_ = "螺旋終了まであと"+str(outputdays1[0])+"日"
-            await message.channel.send(m1_)
-            re = requests.get(url9, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
+            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            await message.channel.send(m2)
+
+        for i in range(4):
+            add = str(i+9)
+            url = before_url + add
+            re = requests.get(url, headers=header)
+            soup = bs(re.content, 'html.parser')
             #n-m 1st | 2nd の部分を取得
             for_j_element  = soup.find_all("h5", {"class": "mb-3"})
             for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
+                #n-m 1st | 2nd の分繰り返す
                 await message.channel.send(for_j_element[j].text)
                 for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
                 list_show_img = []
@@ -213,102 +94,68 @@ async def on_message(message):
                     list_show_img.append(element)
                     hconcat_img = []
                     for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
+                    # 画像をリクエストする
+                            img_url = list_show_img[l]
+                            res = requests.get(img_url)
+                            # Tempfileを作成して即読み込む
+                            fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
+                            fp.write(res.content)
+                            fp.close()
+                            img = cv2.imread(fp.name)
+                            hconcat_img.append(img)
+                            os.remove(fp.name)
                 img = cv2.hconcat(hconcat_img)
                 cv2.imwrite(for_j_element[j].text + ".png", img)
                 await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
                 os.remove(for_j_element[j].text + ".png")
 
-            re = requests.get(url10, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
-        
-            re = requests.get(url11, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
-            #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
-                        # Tempfileを作成して即読み込む
-                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
-                        fp.write(res.content)
-                        fp.close()
-                        img = cv2.imread(fp.name)
-                        hconcat_img.append(img)
-                        os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
+    if message.content == '!rasen9':
+        while 1:
+            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday1 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays1.append(calc.days)
+            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+        while 1:
+            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday2 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays2.append(calc.days)
+            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
 
-            re = requests.get(url12, headers=header)
-            soup = BeautifulSoup(re.content, 'html.parser')
-            #n-m 1st | 2nd の部分を取得
-            for_j_element  = soup.find_all("h5", {"class": "mb-3"})
-            for j in range(len(for_j_element)):
+        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+        header = {'User-Agent': user_agent}
+        before_url = "https://spiralabyss.org/floor-"
+
+        if len(outputdays1) == 0:
+            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
+            await message.channel.send(m1)
+        else:
+            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            await message.channel.send(m2)
+
+        add = str(9)
+        url = before_url + add
+        re = requests.get(url, headers=header)
+        soup = bs(re.content, 'html.parser')
+        #n-m 1st | 2nd の部分を取得
+        for_j_element  = soup.find_all("h5", {"class": "mb-3"})
+        for j in range(len(for_j_element)):
             #n-m 1st | 2nd の分繰り返す
-                print(for_j_element[j].text)
-                await message.channel.send(for_j_element[j].text)
-                for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
-                list_show_img = []
-                #敵のイメージを取得
-                for k in range(len(for_k_element)):
-                    element = for_k_element[k].get("src").replace(" ", "%20")
-                    list_show_img.append(element)
-                    hconcat_img = []
-                    for l in range(len(list_show_img)):
-                        #画像をリクエストする
-                        url = list_show_img[l]
-                        res = requests.get(url)
+            await message.channel.send(for_j_element[j].text)
+            for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
+            list_show_img = []
+            #敵のイメージを取得
+            for k in range(len(for_k_element)):
+                element = for_k_element[k].get("src").replace(" ", "%20")
+                list_show_img.append(element)
+                hconcat_img = []
+                for l in range(len(list_show_img)):
+                # 画像をリクエストする
+                        img_url = list_show_img[l]
+                        res = requests.get(img_url)
                         # Tempfileを作成して即読み込む
                         fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
                         fp.write(res.content)
@@ -316,11 +163,188 @@ async def on_message(message):
                         img = cv2.imread(fp.name)
                         hconcat_img.append(img)
                         os.remove(fp.name)
-                img = cv2.hconcat(hconcat_img)
-                cv2.imwrite(for_j_element[j].text + ".png", img)
-                await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
-                os.remove(for_j_element[j].text + ".png")
+            img = cv2.hconcat(hconcat_img)
+            cv2.imwrite(for_j_element[j].text + ".png", img)
+            await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
+            os.remove(for_j_element[j].text + ".png")
 
+    if message.content == '!rasen10':
+        while 1:
+            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday1 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays1.append(calc.days)
+            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+        while 1:
+            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday2 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays2.append(calc.days)
+            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+
+        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+        header = {'User-Agent': user_agent}
+        before_url = "https://spiralabyss.org/floor-"
+
+        if len(outputdays1) == 0:
+            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
+            await message.channel.send(m1)
+        else:
+            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            await message.channel.send(m2)
+
+        add = str(10)
+        url = before_url + add
+        re = requests.get(url, headers=header)
+        soup = bs(re.content, 'html.parser')
+        #n-m 1st | 2nd の部分を取得
+        for_j_element  = soup.find_all("h5", {"class": "mb-3"})
+        for j in range(len(for_j_element)):
+            #n-m 1st | 2nd の分繰り返す
+            await message.channel.send(for_j_element[j].text)
+            for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
+            list_show_img = []
+            #敵のイメージを取得
+            for k in range(len(for_k_element)):
+                element = for_k_element[k].get("src").replace(" ", "%20")
+                list_show_img.append(element)
+                hconcat_img = []
+                for l in range(len(list_show_img)):
+                # 画像をリクエストする
+                        img_url = list_show_img[l]
+                        res = requests.get(img_url)
+                        # Tempfileを作成して即読み込む
+                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
+                        fp.write(res.content)
+                        fp.close()
+                        img = cv2.imread(fp.name)
+                        hconcat_img.append(img)
+                        os.remove(fp.name)
+            img = cv2.hconcat(hconcat_img)
+            cv2.imwrite(for_j_element[j].text + ".png", img)
+            await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
+            os.remove(for_j_element[j].text + ".png")
+
+    if message.content == '!rasen11':
+        while 1:
+            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday1 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays1.append(calc.days)
+            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+        while 1:
+            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday2 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays2.append(calc.days)
+            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+
+        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+        header = {'User-Agent': user_agent}
+        before_url = "https://spiralabyss.org/floor-"
+
+        if len(outputdays1) == 0:
+            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
+            await message.channel.send(m1)
+        else:
+            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            await message.channel.send(m2)
+
+        add = str(11)
+        url = before_url + add
+        re = requests.get(url, headers=header)
+        soup = bs(re.content, 'html.parser')
+        #n-m 1st | 2nd の部分を取得
+        for_j_element  = soup.find_all("h5", {"class": "mb-3"})
+        for j in range(len(for_j_element)):
+            #n-m 1st | 2nd の分繰り返す
+            await message.channel.send(for_j_element[j].text)
+            for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
+            list_show_img = []
+            #敵のイメージを取得
+            for k in range(len(for_k_element)):
+                element = for_k_element[k].get("src").replace(" ", "%20")
+                list_show_img.append(element)
+                hconcat_img = []
+                for l in range(len(list_show_img)):
+                # 画像をリクエストする
+                        img_url = list_show_img[l]
+                        res = requests.get(img_url)
+                        # Tempfileを作成して即読み込む
+                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
+                        fp.write(res.content)
+                        fp.close()
+                        img = cv2.imread(fp.name)
+                        hconcat_img.append(img)
+                        os.remove(fp.name)
+            img = cv2.hconcat(hconcat_img)
+            cv2.imwrite(for_j_element[j].text + ".png", img)
+            await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
+            os.remove(for_j_element[j].text + ".png")
+
+    if message.content == '!rasen12':
+        while 1:
+            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday1 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays1.append(calc.days)
+            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+        while 1:
+            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday2 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays2.append(calc.days)
+            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+
+        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+        header = {'User-Agent': user_agent}
+        before_url = "https://spiralabyss.org/floor-"
+
+        if len(outputdays1) == 0:
+            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
+            await message.channel.send(m1)
+        else:
+            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            await message.channel.send(m2)
+
+        add = str(12)
+        url = before_url + add
+        re = requests.get(url, headers=header)
+        soup = bs(re.content, 'html.parser')
+        #n-m 1st | 2nd の部分を取得
+        for_j_element  = soup.find_all("h5", {"class": "mb-3"})
+        for j in range(len(for_j_element)):
+            #n-m 1st | 2nd の分繰り返す
+            await message.channel.send(for_j_element[j].text)
+            for_k_element = for_j_element[j].find_all("img", {"class": "enemy hover-scale"})
+            list_show_img = []
+            #敵のイメージを取得
+            for k in range(len(for_k_element)):
+                element = for_k_element[k].get("src").replace(" ", "%20")
+                list_show_img.append(element)
+                hconcat_img = []
+                for l in range(len(list_show_img)):
+                # 画像をリクエストする
+                        img_url = list_show_img[l]
+                        res = requests.get(img_url)
+                        # Tempfileを作成して即読み込む
+                        fp = tempfile.NamedTemporaryFile(dir='./', delete=False)
+                        fp.write(res.content)
+                        fp.close()
+                        img = cv2.imread(fp.name)
+                        hconcat_img.append(img)
+                        os.remove(fp.name)
+            img = cv2.hconcat(hconcat_img)
+            cv2.imwrite(for_j_element[j].text + ".png", img)
+            await message.channel.send(file=discord.File(for_j_element[j].text + ".png"))
+            os.remove(for_j_element[j].text + ".png")
+    
     if message.content == '!dev':
         embed = discord.Embed(
             title="This is development command", color=0x7b68ee)
@@ -333,7 +357,7 @@ async def on_message(message):
         # urlからhtmlを取得
         html = urllib.request.urlopen(url)
         # 構文解析
-        soup = BeautifulSoup(html.read(), "lxml")
+        soup = bs(html.read(), "lxml")
         tables = soup.find("table", {"class": "fixed_table tabbed_gacha_期間限定"}).find(
             "tbody").find_all("tr")
         # ピックアップ中のガチャの写真とキャラ表示
