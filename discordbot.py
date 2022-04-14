@@ -29,14 +29,39 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    # イベント日時を設定
+    # 今日の日時を設定
     today = datetime.datetime.today()
-    eventday1 = datetime.datetime(2022, 3, 1, 5, 0, 0, 0)
-    eventday2 = datetime.datetime(2022, 3, 16, 5, 0, 0)
-    stopday = datetime.datetime(2050, 12, 31, 23, 59, 59)
-    # 空の配列を作成
-    outputdays1 = []
-    outputdays2 = []
+    #スクレイピングの設定
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+    header = {'User-Agent': user_agent}
+    before_url = "https://spiralabyss.org/floor-"
+
+    #日付の関数
+    def get_day(day):
+        eventday1 = datetime.datetime(2022, 3, 1, 5, 0, 0, 0)
+        eventday2 = datetime.datetime(2022, 3, 16, 5, 0, 0)
+        stopday = datetime.datetime(2050, 12, 31, 23, 59, 59)
+        # 空の配列を作成
+        outputdays1 = []
+        outputdays2 = []
+
+        while 1:
+            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
+            calc = eventday1 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays1.append(calc.days)
+            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+    
+        while 1:
+            eventday2 += relativedelta(months=1)
+            calc = eventday2 - today
+            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
+                outputdays2.append(calc.days)
+            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
+                break
+        return outputdays1, outputdays2
+
     if message.author.bot:
         return
     if message.content == '!help':
@@ -49,36 +74,21 @@ async def on_message(message):
         embed.add_field(name="!rasen12", value="いつ螺旋が終了するかを表示し、12層の敵の編成を表示する", inline=False)
         embed.add_field(name="!gacha", value="ピックアップ中のガチャを表示する", inline=False)
         await message.channel.send(embed=embed)
+
     if message.content == '!rasen_all':
-        while 1:
-            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday1 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays1.append(calc.days)
-            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-        while 1:
-            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday2 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays2.append(calc.days)
-            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-        header = {'User-Agent': user_agent}
-        before_url = "https://spiralabyss.org/floor-"
-
-        if len(outputdays1) == 0:
-            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
-            await message.channel.send(m1)
+        result = get_day(today)
+        #日付の出力
+        if len(result[0]) == 0:
+           m1 = "螺旋終了まであと"+str(result[1][0])+"日"
+           await message.channel.send(m1)
         else:
-            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            m2 = "螺旋終了まであと"+str(result[0][0])+"日"
             await message.channel.send(m2)
-
+        #9~12層までスクレイピング
         for i in range(4):
             add = str(i+9)
             url = before_url + add
+            print(url)
             re = requests.get(url, headers=header)
             soup = bs(re.content, 'html.parser')
             #n-m 1st | 2nd の部分を取得
@@ -110,32 +120,15 @@ async def on_message(message):
                 os.remove(for_j_element[j].text + ".png")
 
     if message.content == '!rasen9':
-        while 1:
-            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday1 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays1.append(calc.days)
-            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-        while 1:
-            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday2 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays2.append(calc.days)
-            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-        header = {'User-Agent': user_agent}
-        before_url = "https://spiralabyss.org/floor-"
-
-        if len(outputdays1) == 0:
-            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
-            await message.channel.send(m1)
+        result = get_day(today)
+        #日付の出力
+        if len(result[0]) == 0:
+           m1 = "螺旋終了まであと"+str(result[1][0])+"日"
+           await message.channel.send(m1)
         else:
-            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            m2 = "螺旋終了まであと"+str(result[0][0])+"日"
             await message.channel.send(m2)
-
+        #9層のスクレイピング
         add = str(9)
         url = before_url + add
         re = requests.get(url, headers=header)
@@ -169,32 +162,15 @@ async def on_message(message):
             os.remove(for_j_element[j].text + ".png")
 
     if message.content == '!rasen10':
-        while 1:
-            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday1 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays1.append(calc.days)
-            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-        while 1:
-            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday2 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays2.append(calc.days)
-            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-        header = {'User-Agent': user_agent}
-        before_url = "https://spiralabyss.org/floor-"
-
-        if len(outputdays1) == 0:
-            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
-            await message.channel.send(m1)
+        result = get_day(today)
+        #日付の出力
+        if len(result[0]) == 0:
+           m1 = "螺旋終了まであと"+str(result[1][0])+"日"
+           await message.channel.send(m1)
         else:
-            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            m2 = "螺旋終了まであと"+str(result[0][0])+"日"
             await message.channel.send(m2)
-
+        #10層のスクレイピング
         add = str(10)
         url = before_url + add
         re = requests.get(url, headers=header)
@@ -228,32 +204,15 @@ async def on_message(message):
             os.remove(for_j_element[j].text + ".png")
 
     if message.content == '!rasen11':
-        while 1:
-            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday1 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays1.append(calc.days)
-            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-        while 1:
-            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday2 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays2.append(calc.days)
-            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-        header = {'User-Agent': user_agent}
-        before_url = "https://spiralabyss.org/floor-"
-
-        if len(outputdays1) == 0:
-            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
-            await message.channel.send(m1)
+        result = get_day(today)
+        #日付の出力
+        if len(result[0]) == 0:
+           m1 = "螺旋終了まであと"+str(result[1][0])+"日"
+           await message.channel.send(m1)
         else:
-            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            m2 = "螺旋終了まであと"+str(result[0][0])+"日"
             await message.channel.send(m2)
-
+        #11層のスクレイピング
         add = str(11)
         url = before_url + add
         re = requests.get(url, headers=header)
@@ -287,32 +246,15 @@ async def on_message(message):
             os.remove(for_j_element[j].text + ".png")
 
     if message.content == '!rasen12':
-        while 1:
-            eventday1 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday1 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays1.append(calc.days)
-            if eventday1 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-        while 1:
-            eventday2 += relativedelta(months=1)  # イベント日時を1ヶ月増やす
-            calc = eventday2 - today
-            if 0 <= calc.days < 16:  # 16日以内にイベントがある場合表示する
-                outputdays2.append(calc.days)
-            if eventday2 > stopday:  # イベント日時が終了日時を超えたらループを抜ける
-                break
-
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-        header = {'User-Agent': user_agent}
-        before_url = "https://spiralabyss.org/floor-"
-
-        if len(outputdays1) == 0:
-            m1 = "螺旋終了まであと"+str(outputdays2[0])+"日"
-            await message.channel.send(m1)
+        result = get_day(today)
+        #日付の出力
+        if len(result[0]) == 0:
+           m1 = "螺旋終了まであと"+str(result[1][0])+"日"
+           await message.channel.send(m1)
         else:
-            m2 = "螺旋終了まであと"+str(outputdays1[0])+"日"
+            m2 = "螺旋終了まであと"+str(result[0][0])+"日"
             await message.channel.send(m2)
-
+        #12層のスクレイピング
         add = str(12)
         url = before_url + add
         re = requests.get(url, headers=header)
